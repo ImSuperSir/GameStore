@@ -1,4 +1,5 @@
-﻿using ImSuperSir.GameStore.API.Entities;
+﻿using ImSuperSir.GameStore.API.DTOs;
+using ImSuperSir.GameStore.API.Entities;
 using ImSuperSir.GameStore.API.Repositories;
 
 namespace ImSuperSir.GameStore.API.EndPoints
@@ -11,41 +12,50 @@ namespace ImSuperSir.GameStore.API.EndPoints
         
         public static RouteGroupBuilder MapGameEndPoints(this IEndpointRouteBuilder routes)
         {
-            InMemoryGamesRepository repository = new InMemoryGamesRepository();
-
+            
             var group = routes.MapGroup("/games").WithParameterValidation();
 
-            group.MapGet("/", () =>
+            group.MapGet("/", (IGamesRepository repository) =>
             {
                 //TODO: check for when the list is empty
-                return Results.Ok(repository.GetAll());
+                return Results.Ok(repository.GetAll().Select( game => game.AsGameDto()));
             });
 
-            group.MapGet("/{id}", (int id) =>
+            group.MapGet("/{id}", (IGamesRepository repository, int id) =>
             {
                 Game? game = repository.GetGameById(id);
-                return game != null ? Results.Ok(game) : Results.NotFound();
+                return game != null ? Results.Ok(game.AsGameDto()) : Results.NotFound();
 
             }).WithName(GetGameEndPointName);
 
-            group.MapPost("/", (Game game) =>
+            group.MapPost("/", (IGamesRepository repository,CreateGameDto gameDto) =>
             {
+                Game game = new Game() 
+                { 
+                    Name = gameDto.Name,
+                    Genre = gameDto.Genre,
+                    ImageUri = gameDto.ImageUri,
+                    Price = gameDto.Price,
+                    ReleaseDate = gameDto.ReleaseDate,
+                   
+                };
                 repository.Create(game);
                 return Results.CreatedAtRoute(GetGameEndPointName, new { id = game.Id }, game);
 
             });
 
-            group.MapPut("/{id}", (Game updatedGame, int id) =>
+            group.MapPut("/{id}", (IGamesRepository repository,UpdateGameDto updatedGameDto, int id) =>
             {
-                Game existingGame = repository.GetGameById(id);
+
+                Game? existingGame = repository.GetGameById(id);
 
                 if (existingGame == null) return Results.NotFound();
 
-                existingGame.Name = updatedGame.Name;
-                existingGame.Genre = updatedGame.Genre;
-                existingGame.Price = updatedGame.Price;
-                existingGame.ReleaseDate = updatedGame.ReleaseDate;
-                existingGame.ImageUri = updatedGame.ImageUri;
+                existingGame.Name = updatedGameDto.Name;
+                existingGame.Genre = updatedGameDto.Genre;
+                existingGame.Price = updatedGameDto.Price;
+                existingGame.ReleaseDate = updatedGameDto.ReleaseDate;
+                existingGame.ImageUri = updatedGameDto.ImageUri;
 
                 repository.Update(existingGame);
 
@@ -53,9 +63,9 @@ namespace ImSuperSir.GameStore.API.EndPoints
 
             });
 
-            group.MapDelete("/{id}", (int id) =>
+            group.MapDelete("/{id}", (IGamesRepository repository,int id) =>
             {
-                Game game = repository.GetGameById(id); 
+                Game? game = repository.GetGameById(id); 
 
                 if (game != null)
                 {

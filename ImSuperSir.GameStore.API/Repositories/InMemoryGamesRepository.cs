@@ -2,7 +2,7 @@
 
 namespace ImSuperSir.GameStore.API.Repositories
 {
-    public class InMemoryGamesRepository
+    public class InMemoryGamesRepository : IGamesRepository
     {
 
         private List<Game> games = new List<Game>()
