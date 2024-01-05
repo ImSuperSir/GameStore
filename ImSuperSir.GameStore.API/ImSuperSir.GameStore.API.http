@@ -1,0 +1,5 @@
+﻿@ImSuperSir.GameStore.API_HostAddress = https://localhost:7029
+
+GET {{ImSuperSir.GameStore.API_HostAddress}}/games/
+
+###
