@@ -1,4 +1,5 @@
 ﻿using ImSuperSir.GameStore.API.Entities;
+using ImSuperSir.GameStore.API.Repositories;
 
 namespace ImSuperSir.GameStore.API.EndPoints
 {
@@ -7,66 +8,36 @@ namespace ImSuperSir.GameStore.API.EndPoints
 
         const string GetGameEndPointName = "GamesStore";
 
-        static List<Game> games = new List<Game>()
-            {
-                new Game() {
-                    Id = 1,
-                    Name = "Juego de titanes",
-                    Genre="Accion",
-                    Price=3.99M,
-                    ReleaseDate = new DateTime(1976,04,16),
-                    ImageUri = "https://placehold.co/100"
-                },
-                  new Game() {
-                    Id = 2,
-                    Name = "Rojo Car",
-                    Genre="Accion",
-                    Price=3.99M,
-                    ReleaseDate = new DateTime(1976,04,16),
-                    ImageUri = "https://placehold.co/100"
-                },
-                  new Game() {
-                    Id = 3,
-                    Name = "Dance with wolfs",
-                    Genre="Accion",
-                    Price=3.99M,
-                    ReleaseDate = new DateTime(1976,04,16),
-                    ImageUri = "https://placehold.co/100"
-                }
-            };
-
+        
         public static RouteGroupBuilder MapGameEndPoints(this IEndpointRouteBuilder routes)
         {
+            InMemoryGamesRepository repository = new InMemoryGamesRepository();
+
             var group = routes.MapGroup("/games").WithParameterValidation();
 
             group.MapGet("/", () =>
             {
-                return Results.Ok(games);
+                //TODO: check for when the list is empty
+                return Results.Ok(repository.GetAll());
             });
 
             group.MapGet("/{id}", (int id) =>
             {
-                Game game = games.Find(x => x.Id == id);
-
-                if (game == null) return Results.NotFound();
-
-                return Results.Ok(game);
-
+                Game? game = repository.GetGameById(id);
+                return game != null ? Results.Ok(game) : Results.NotFound();
 
             }).WithName(GetGameEndPointName);
 
             group.MapPost("/", (Game game) =>
             {
-
-                game.Id = games.Max(x => x.Id) + 1;
-                games.Add(game);
-
+                repository.Create(game);
                 return Results.CreatedAtRoute(GetGameEndPointName, new { id = game.Id }, game);
+
             });
 
             group.MapPut("/{id}", (Game updatedGame, int id) =>
             {
-                Game existingGame = games.Find(x => x.Id == id);
+                Game existingGame = repository.GetGameById(id);
 
                 if (existingGame == null) return Results.NotFound();
 
@@ -76,17 +47,19 @@ namespace ImSuperSir.GameStore.API.EndPoints
                 existingGame.ReleaseDate = updatedGame.ReleaseDate;
                 existingGame.ImageUri = updatedGame.ImageUri;
 
+                repository.Update(existingGame);
+
                 return Results.NoContent();
 
             });
 
             group.MapDelete("/{id}", (int id) =>
             {
-                Game game = games.Find(x => x.Id == id);
+                Game game = repository.GetGameById(id); 
 
                 if (game != null)
                 {
-                    games.Remove(game);
+                    repository.Delete(id);
                 }
 
                 return Results.NoContent();
