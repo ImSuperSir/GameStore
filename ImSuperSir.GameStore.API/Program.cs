@@ -4,6 +4,8 @@ using System.Reflection.Metadata.Ecma335;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
+var group = app.MapGroup("/games");
+
 const string GetGameEndPointName = "GamesStore";
 
 List<Game> games = new List<Game>() {
@@ -34,11 +36,11 @@ List<Game> games = new List<Game>() {
 };
 
 
-app.MapGet("/games", () => { 
+group.MapGet("/", () => { 
     return Results.Ok(games);
 });
 
-app.MapGet("/games/{id}", (int id) =>
+group.MapGet("/{id}", (int id) =>
 {
     Game game = games.Find( x => x.Id == id);
     
@@ -50,7 +52,7 @@ app.MapGet("/games/{id}", (int id) =>
 }).WithName(GetGameEndPointName);
 
 
-app.MapPost("/games", (Game game) => 
+group.MapPost("/", (Game game) => 
 {
 
     game.Id = games.Max(x => x.Id) + 1;
@@ -60,7 +62,7 @@ app.MapPost("/games", (Game game) =>
 });
 
 
-app.MapPut("/games/{id}", (Game updatedGame, int id) =>
+group.MapPut("/{id}", (Game updatedGame, int id) =>
 {
     Game existingGame = games.Find(x => x.Id == id);
 
@@ -76,7 +78,7 @@ app.MapPut("/games/{id}", (Game updatedGame, int id) =>
 
 });
 
-app.MapDelete("/Games/{id}", (int id) =>
+group.MapDelete("/{id}", (int id) =>
 {
     Game game = games.Find(x => x.Id == id);
 
