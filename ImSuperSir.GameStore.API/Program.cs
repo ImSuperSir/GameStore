@@ -7,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IGamesRepository, InMemoryGamesRepository>();
 
+var connString = builder.Configuration.GetConnectionString("GamesStoreContext");
+
 var app = builder.Build();
 
 app.MapGameEndPoints();
