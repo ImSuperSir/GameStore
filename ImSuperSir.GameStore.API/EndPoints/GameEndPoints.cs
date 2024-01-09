@@ -15,20 +15,20 @@ namespace ImSuperSir.GameStore.API.EndPoints
             
             var group = routes.MapGroup("/games").WithParameterValidation();
 
-            group.MapGet("/", (IGamesRepository repository) =>
+            group.MapGet("/", async (IGamesRepository repository) =>
             {
                 //TODO: check for when the list is empty
-                return Results.Ok(repository.GetAll().Select( game => game.AsGameDto()));
+                return Results.Ok((await repository.GetAllAsync()).Select( game => game.AsGameDto()));
             });
 
-            group.MapGet("/{id}", (IGamesRepository repository, int id) =>
+            group.MapGet("/{id}", async (IGamesRepository repository, int id) =>
             {
-                Game? game = repository.GetGameById(id);
+                Game? game = await repository.GetAsync(id);
                 return game != null ? Results.Ok(game.AsGameDto()) : Results.NotFound();
 
             }).WithName(GetGameEndPointName);
 
-            group.MapPost("/", (IGamesRepository repository,CreateGameDto gameDto) =>
+            group.MapPost("/", async (IGamesRepository repository,CreateGameDto gameDto) =>
             {
                 Game game = new Game() 
                 { 
@@ -39,15 +39,15 @@ namespace ImSuperSir.GameStore.API.EndPoints
                     ReleaseDate = gameDto.ReleaseDate,
                    
                 };
-                repository.Create(game);
+                await repository.CreateAsync(game);
                 return Results.CreatedAtRoute(GetGameEndPointName, new { id = game.Id }, game);
 
             });
 
-            group.MapPut("/{id}", (IGamesRepository repository,UpdateGameDto updatedGameDto, int id) =>
+            group.MapPut("/{id}", async (IGamesRepository repository,UpdateGameDto updatedGameDto, int id) =>
             {
 
-                Game? existingGame = repository.GetGameById(id);
+                Game? existingGame = await repository.GetAsync(id);
 
                 if (existingGame == null) return Results.NotFound();
 
@@ -57,19 +57,19 @@ namespace ImSuperSir.GameStore.API.EndPoints
                 existingGame.ReleaseDate = updatedGameDto.ReleaseDate;
                 existingGame.ImageUri = updatedGameDto.ImageUri;
 
-                repository.Update(existingGame);
+                await repository.UpdateAsync(existingGame);
 
                 return Results.NoContent();
 
             });
 
-            group.MapDelete("/{id}", (IGamesRepository repository,int id) =>
+            group.MapDelete("/{id}", async (IGamesRepository repository,int id) =>
             {
-                Game? game = repository.GetGameById(id); 
+                Game? game = await repository.GetAsync(id); 
 
                 if (game != null)
                 {
-                    repository.Delete(id);
+                    await repository.DeleteAsync(id);
                 }
 
                 return Results.NoContent();

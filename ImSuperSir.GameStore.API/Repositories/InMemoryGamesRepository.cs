@@ -34,29 +34,39 @@ namespace ImSuperSir.GameStore.API.Repositories
             };
         public InMemoryGamesRepository() { }
 
-        public List<Game> GetAll() {  return games; }
-
-
-        public Game? GetGameById(int id) 
-        { 
-            return games.Find(game => game.Id == id); 
+        public async Task<IEnumerable<Game>> GetAllAsync() 
+        {  
+            return await Task.FromResult( games); 
         }
-        public void Create(Game newGame) 
+
+
+        public async Task<Game?> GetAsync(int id) 
+        { 
+            return await Task.FromResult( games.Find(game => game.Id == id)); 
+        }
+        public async Task CreateAsync(Game newGame) 
         {
             newGame.Id = games.Max(game => game.Id) + 1;
             games.Add(newGame);
+
+            await Task.CompletedTask;
+
         }
 
-        public void Update(Game updatedGame)
+        public async Task UpdateAsync(Game updatedGame)
         {
             var index = games.FindIndex(game => game.Id == updatedGame.Id);
             games[index] = updatedGame;
+
+            await Task.CompletedTask;
         }
 
 
-        public void Delete(int id) {
+        public async Task DeleteAsync(int id) {
             var index = games.FindIndex(game => game.Id == id);
             games.RemoveAt(index);
+
+            await Task.CompletedTask;
         }
 
 
