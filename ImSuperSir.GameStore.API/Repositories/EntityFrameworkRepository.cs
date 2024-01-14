@@ -9,9 +9,12 @@ public class EntityFrameworkRepository : IGamesRepository
 
     private readonly GameStoreContext dbContext;
 
-    public EntityFrameworkRepository(GameStoreContext dbContext)
+    private readonly ILogger<GameStoreContext> logger;
+
+    public EntityFrameworkRepository(GameStoreContext dbContext, ILogger<GameStoreContext> logger)
     {
         this.dbContext = dbContext;
+        this.logger = logger;
     }
 
 
@@ -34,6 +37,8 @@ public class EntityFrameworkRepository : IGamesRepository
     {
         dbContext.Games.Add(newGame);
         await dbContext.SaveChangesAsync();
+
+        logger.LogInformation("The Game: {Name} has been created with {Price } price", newGame.Name, newGame.Price );
 
         
     }
