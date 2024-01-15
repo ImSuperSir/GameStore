@@ -5,9 +5,9 @@ namespace ImSuperSir.GameStore.API.Entities
     public static class EntityExtensions
     {
 
-        public static GameDto AsGameDto(this Game game)
+        public static GameDtov1 AsGameDtoV1(this Game game)
         {
-            return new GameDto(
+            return new GameDtov1(
                 game.Id,
                 game.Name,
                 game.Genre,
@@ -16,5 +16,19 @@ namespace ImSuperSir.GameStore.API.Entities
                 game.ImageUri
                 );
         }
+
+        public static GameDtov2 AsGameDtoV2(this Game game)
+        {
+            return new GameDtov2(
+                game.Id,
+                game.Name,
+                game.Genre,
+                game.Price - (game.Price * .3m),
+                game.Price,
+                game.ReleaseDate,
+                game.ImageUri
+                );
+        }
+
     }
 }

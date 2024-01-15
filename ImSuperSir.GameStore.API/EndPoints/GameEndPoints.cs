@@ -10,57 +10,45 @@ namespace ImSuperSir.GameStore.API.EndPoints
     {
 
         const string GetGameEndPointName = "GamesStore";
+        const string GetGameEndPointNameV2 = "GamesStoreV2";
 
 
         public static RouteGroupBuilder MapGameEndPoints(this IEndpointRouteBuilder routes)
         {
 
-            var group = routes.MapGroup("/games").WithParameterValidation();
+            var group = routes.MapGroup("/V1/games").WithParameterValidation();
+            var group2 = routes.MapGroup("/V2/games").WithParameterValidation();
 
 
 
             group.MapGet("/", async (IGamesRepository repository, ILoggerFactory loggerFactory) =>
             {
-
-
-                return Results.Ok((await repository.GetAllAsync()).Select(game => game.AsGameDto()));
-
-                /*
-                    We use the loggerFactory insteaf of logger, because this is a static class
-                so we do not can use Ilogger<GameEndpoints> logger
-                 */
-                //try
-                //{
-                //    //TODO: check for when the list is empty
-                //    return Results.Ok((await repository.GetAllAsync()).Select(game => game.AsGameDto()));
-                //    //return (await repository.GetAllAsync()).Select(game => game.AsGameDto());
-
-                //}
-                //catch (Exception ex)
-                //{
-                //    var logger = loggerFactory.CreateLogger("GameEndpoints");
-                //    logger.LogError(ex, "Could not process a request on machine {machine}. Traceid:{traceid}",
-                //        Environment.MachineName, Activity.Current?.TraceId
-                //        );
-
-                //    return Results.Problem(
-                //        title: "Somethin related to the database has happend in the server, we are working on that.",
-                //        statusCode: StatusCodes.Status500InternalServerError,
-                //        extensions: new Dictionary<string, object?>()
-                //        {
-                //            {"TraceId", Activity.Current?.TraceId.ToString() }  //we ise the ToString, because the TraceId, is not going to be serialized properly
-                //        }
-                //        );
-                //}
+                return Results.Ok((await repository.GetAllAsync()).Select(game => game.AsGameDtoV1()));
             });
 
             group.MapGet("/{id}", async (IGamesRepository repository, int id) =>
             {
                 Game? game = await repository.GetAsync(id);
-                return game != null ? Results.Ok(game.AsGameDto()) : Results.NotFound();
+                return game != null ? Results.Ok(game.AsGameDtoV1()) : Results.NotFound();
 
             }).WithName(GetGameEndPointName)
             .RequireAuthorization(Policies.ReadAccess);
+
+
+            /*Esto es para la version dis*/
+            group2.MapGet("/", async (IGamesRepository repository, ILoggerFactory loggerFactory) =>
+            {
+                return Results.Ok((await repository.GetAllAsync()).Select(game => game.AsGameDtoV2()));
+            });
+
+            group2.MapGet("/{id}", async (IGamesRepository repository, int id) =>
+            {
+                Game? game = await repository.GetAsync(id);
+                return game != null ? Results.Ok(game.AsGameDtoV2()) : Results.NotFound();
+
+            }).WithName(GetGameEndPointNameV2)
+            .RequireAuthorization(Policies.ReadAccess);
+
 
             group.MapPost("/", async (IGamesRepository repository, CreateGameDto gameDto) =>
             {

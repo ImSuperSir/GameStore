@@ -3,12 +3,23 @@
 namespace ImSuperSir.GameStore.API.DTOs;
 
 
-public record GameDto
+public record GameDtov1
 (
     int Id,
     string Name,
     string Genre,
     decimal Price,
+    DateTime ReleaseDate,
+    string ImageUri
+);
+
+public record GameDtov2
+(
+    int Id,
+    string Name,
+    string Genre,
+    decimal Price,
+    decimal PriceRetail,
     DateTime ReleaseDate,
     string ImageUri
 );

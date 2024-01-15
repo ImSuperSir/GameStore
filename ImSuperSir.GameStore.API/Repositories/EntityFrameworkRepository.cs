@@ -26,7 +26,6 @@ public class EntityFrameworkRepository : IGamesRepository
 
     public async Task<IEnumerable<Game>> GetAllAsync()
     {
-        throw new ArgumentOutOfRangeException("This has been provoqued");
         return await dbContext.Games.AsNoTracking().ToListAsync();
     }
     public async Task<Game?> GetAsync(int id)
