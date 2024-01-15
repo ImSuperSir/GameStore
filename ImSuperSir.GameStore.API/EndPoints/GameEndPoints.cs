@@ -2,6 +2,7 @@
 using ImSuperSir.GameStore.API.DTOs;
 using ImSuperSir.GameStore.API.Entities;
 using ImSuperSir.GameStore.API.Repositories;
+using System.Diagnostics;
 
 namespace ImSuperSir.GameStore.API.EndPoints
 {
@@ -16,10 +17,41 @@ namespace ImSuperSir.GameStore.API.EndPoints
 
             var group = routes.MapGroup("/games").WithParameterValidation();
 
-            group.MapGet("/", async (IGamesRepository repository) =>
+
+
+            group.MapGet("/", async (IGamesRepository repository, ILoggerFactory loggerFactory) =>
             {
-                //TODO: check for when the list is empty
+
+
                 return Results.Ok((await repository.GetAllAsync()).Select(game => game.AsGameDto()));
+
+                /*
+                    We use the loggerFactory insteaf of logger, because this is a static class
+                so we do not can use Ilogger<GameEndpoints> logger
+                 */
+                //try
+                //{
+                //    //TODO: check for when the list is empty
+                //    return Results.Ok((await repository.GetAllAsync()).Select(game => game.AsGameDto()));
+                //    //return (await repository.GetAllAsync()).Select(game => game.AsGameDto());
+
+                //}
+                //catch (Exception ex)
+                //{
+                //    var logger = loggerFactory.CreateLogger("GameEndpoints");
+                //    logger.LogError(ex, "Could not process a request on machine {machine}. Traceid:{traceid}",
+                //        Environment.MachineName, Activity.Current?.TraceId
+                //        );
+
+                //    return Results.Problem(
+                //        title: "Somethin related to the database has happend in the server, we are working on that.",
+                //        statusCode: StatusCodes.Status500InternalServerError,
+                //        extensions: new Dictionary<string, object?>()
+                //        {
+                //            {"TraceId", Activity.Current?.TraceId.ToString() }  //we ise the ToString, because the TraceId, is not going to be serialized properly
+                //        }
+                //        );
+                //}
             });
 
             group.MapGet("/{id}", async (IGamesRepository repository, int id) =>

@@ -1,6 +1,9 @@
 using ImSuperSir.GameStore.API.Authorization;
 using ImSuperSir.GameStore.API.Data;
 using ImSuperSir.GameStore.API.EndPoints;
+using ImSuperSir.GameStore.API.ErrorHandling;
+using ImSuperSir.GameStore.API.Middleware;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,21 +13,19 @@ builder.Services.AddAuthentication().AddJwtBearer();
 builder.Services.AddGameStoreAuthorization();
 
 
-//I've commented this, 'cause it is too verbose..
 
-//builder.Logging.AddJsonConsole(options => {
-
-//    options.JsonWriterOptions = new() {
-//        Indented = true
-//    };
-//});
-
-builder.Services.AddHttpLogging( opttion => { } );
+builder.Services.AddHttpLogging(option => { });
 
 var app = builder.Build();
 
+
+//using the built-in exception handler
+app.UseExceptionHandler((exceptionHandlerApp) => exceptionHandlerApp.ConfigureExceptionHandler());
+app.UseMiddleware<RequestTimingMiddleware>();
+
+
 await app.Services.InitializaDbAsync();
-//app.Logger.LogInformation("the database is ready...");
+
 
 app.UseHttpLogging();
 
