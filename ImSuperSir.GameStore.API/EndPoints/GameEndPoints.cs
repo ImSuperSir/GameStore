@@ -17,7 +17,7 @@ namespace ImSuperSir.GameStore.API.EndPoints
         {
 
             var group = routes.NewVersionedApi()
-                            .MapGroup("/v{version:apiVersion}/games")
+                            .MapGroup("/games") //.MapGroup("/v{version:apiVersion}/games")
                             .HasApiVersion(1.0)
                             .HasApiVersion(2.0)
                             .WithParameterValidation();
