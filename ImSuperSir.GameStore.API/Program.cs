@@ -1,4 +1,5 @@
 using ImSuperSir.GameStore.API.Authorization;
+using ImSuperSir.GameStore.API.CORS;
 using ImSuperSir.GameStore.API.Data;
 using ImSuperSir.GameStore.API.EndPoints;
 using ImSuperSir.GameStore.API.ErrorHandling;
@@ -18,6 +19,7 @@ builder.Services.AddApiVersioning( options => {
 });
 
 
+builder.Services.AddGameStoreCors(builder.Configuration);
 
 builder.Services.AddHttpLogging(option => { });
 
@@ -35,5 +37,7 @@ await app.Services.InitializaDbAsync();
 app.UseHttpLogging();
 
 app.MapGameEndPoints();
+
+app.UseCors();
 
 app.Run();
